@@ -1,0 +1,13 @@
+*.egg
+*.egg-info
+*.pyc
+.cache
+.coverage
+.coverage.*
+.eggs
+.egg-info
+.tox
+/.mypy_cache
+build
+*.swp
+dist

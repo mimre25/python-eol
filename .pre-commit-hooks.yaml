@@ -1,0 +1,12 @@
+---
+- id: python-eol-check
+  name: Python End of Life Check
+  description: This hook checks whether the used python version is past its end
+    of life
+  entry: eol
+  language: python
+  types: [python]
+  always_run: true
+    # for backward compatibility
+  files: ''
+  minimum_pre_commit_version: 0.15.0

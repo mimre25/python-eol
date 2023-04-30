@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "python_eol"
+version = "0.0.1"
+authors = [
+  {name = "Martin Imre", email = "martinimre25@gmail.com"}
+]
+description = "Simple tool to check if python version is past EOL"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only"
+]
+
+[project.urls]
+"Source" = "https://github.com/mimre25/python-eol"
+
+[project.scripts]
+eol = "python_eol.main:main"
+
+[tool.setuptools]
+packages = ["python_eol"]
+
+[tool.setuptools.package-data]
+python_eol = ["*.json"]
+
+###### Tooling #####
+
+##### ruff #####
+[tool.ruff]
+select = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ",  "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI",  "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+ignore = ["D203", "D213"]
+
+fixable = ["A", "B", "C", "D", "E", "F", "G", "I", "N", "Q", "S", "T", "W", "ANN", "ARG", "BLE", "COM", "DJ",  "EM", "ERA", "EXE", "FBT", "ICN", "INP", "ISC", "NPY", "PD", "PGH", "PIE", "PL", "PT", "PTH", "PYI",  "RSE", "RUF", "SIM", "SLF", "TCH", "TID", "TRY", "UP", "YTT"]
+unfixable = []
+
+[tool.ruff.per-file-ignores]
+"tests/*"= ["S101", "D100", "D103", "D104"]
+
+##### pytest #####
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["python_eol"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = ['^if __name__ == "__main__":$', 'raise SystemExit(.+)$']
+
+###### mypy #####
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+##### black #####
+[tool.black]
+target_version = ["py37", "py38", "py39", "py310", "py311"]
+include = '\.py$'
+exclude = '.+\.json'
