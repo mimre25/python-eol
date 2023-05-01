@@ -36,3 +36,4 @@ repos:
     rev: v0.0.1
     hooks:
       - id: python-eol-check
+        args: [--fail-close-to-eol]
