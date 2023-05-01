@@ -18,8 +18,9 @@ Simply invoke `eol` from your command line
 eol
 ```
 **Options**:
-```
-  --fail-close-to-eol  Fail if the python version is close to eol instead of just warn
+```sh
+  --fail-close-to-eol   Fail if the python version is close to eol instead of just warn
+  --check-docker-files  Search for Dockerfile (**/*Dockerfile*) and check the python versions specified inside them
 ```
 
 ## Pre-commit-hook
@@ -27,7 +28,7 @@ Add the following to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: https://github.com/mimre25/python-eol/
-    rev: v0.0.1
+    rev: v0.0.2
     hooks:
       - id: python-eol-check
 ```
