@@ -49,7 +49,7 @@ def _check_eol(
 ) -> int:
     my_version_info = version_info[python_version]
     today = date.today()
-    eol_date = date.fromisoformat(my_version_info["eol"])
+    eol_date = date.fromisoformat(my_version_info["End of Life"])
     time_to_eol = eol_date - today
 
     if time_to_eol.days < 0:
@@ -79,7 +79,7 @@ def _check_python_eol(
     with db_file.open() as f:
         eol_data = json.load(f)
 
-    version_info = {entry["cycle"]: entry for entry in eol_data}
+    version_info = {entry["Version"]: entry for entry in eol_data}
 
     my_version = _get_major_minor()
 
