@@ -19,8 +19,15 @@ eol
 ```
 **Options**:
 ```sh
+usage: eol [-h] [--fail-close-to-eol] [--check-docker-files] [--nep29]
+
+eol check if your python version is beyond end of life
+
+options:
+  -h, --help            show this help message and exit
   --fail-close-to-eol   Fail if the python version is close to eol instead of just warn
   --check-docker-files  Search for Dockerfile (**/*Dockerfile*) and check the python versions specified inside them
+  --nep29               Use NEP0029 end of life policy
 ```
 
 ## Pre-commit-hook
