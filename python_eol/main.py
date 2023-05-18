@@ -58,7 +58,7 @@ def _check_eol(
     if time_to_eol.days < EOL_WARN_DAYS:
         msg = (
             f"{prefix}Python {python_version} is going to "
-            f"be end of life in 2 months {eol_date}"
+            f"be end of life within the next 2 months ({eol_date})"
         )
 
         if fail_close_to_eol:

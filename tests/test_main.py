@@ -132,5 +132,8 @@ def test_version_in_dockerfile_close_to_eol(
         )
         assert result == expected_return_status
 
-    msg = f"{p}: Python 3.7 is going to be end of life in 2 months 2023-06-27"
+    msg = (
+        f"{p}: Python 3.7 is going to be end of life within the next 2 months"
+        " (2023-06-27)"
+    )
     assert caplog.record_tuples == [("python_eol.main", log_level, msg)]
