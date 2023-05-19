@@ -35,7 +35,7 @@ Add the following to your `.pre-commit-config.yaml`:
 ```yaml
 repos:
   - repo: https://github.com/mimre25/python-eol/
-    rev: v0.0.2
+    rev: v0.0.3
     hooks:
       - id: python-eol-check
 ```
