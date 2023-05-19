@@ -43,10 +43,12 @@ mock_py311 = pytest.mark.usefixtures("_mock_py311")
 def test_get_argparser() -> None:
     parser = _get_argparser()
     args, kwargs = parser.parse_known_args(
-        ["--fail-close-to-eol"],
+        ["--fail-close-to-eol", "--check-docker-files", "--nep29"],
     )
 
     assert args.fail_close_to_eol is True
+    assert args.check_docker_files is True
+    assert args.nep29 is True
 
 
 def test_get_argparser2() -> None:
@@ -56,6 +58,15 @@ def test_get_argparser2() -> None:
     )
 
     assert args.fail_close_to_eol is False
+    assert args.check_docker_files is False
+    assert args.nep29 is False
+
+
+@mock_py37
+@freeze_time("2021-12-27")
+def test_ep_mode() -> None:
+    result = _check_python_eol(nep_mode=True)
+    assert result == 1
 
 
 @mock_py37
@@ -132,5 +143,8 @@ def test_version_in_dockerfile_close_to_eol(
         )
         assert result == expected_return_status
 
-    msg = f"{p}: Python 3.7 is going to be end of life in 2 months 2023-06-27"
+    msg = (
+        f"{p}: Python 3.7 is going to be end of life within the next 2 months"
+        " (2023-06-27)"
+    )
     assert caplog.record_tuples == [("python_eol.main", log_level, msg)]

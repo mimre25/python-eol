@@ -21,20 +21,20 @@ def _get_major_minor() -> str:
     return f"{major}.{minor}"
 
 
-def _get_db_file_path() -> Path:
+def _get_db_file_path(*, nep_mode: bool = False) -> Path:
     major, minor, _ = platform.python_version_tuple()
-
+    filename = "db.json" if not nep_mode else "db_nep.json"
     if int(major) == 3 and int(minor) >= 9:  # noqa: PLR2004
         import importlib.resources
 
         data_path = importlib.resources.files("python_eol")
-        db_file = f"{data_path}/db.json"
+        db_file = f"{data_path}/{filename}"
     else:
         import pkg_resources  # pragma: no cover
 
         db_file = pkg_resources.resource_filename(
             "python_eol",
-            "db.json",
+            filename,
         )  # pragma: no cover
 
     return Path(db_file)
@@ -49,7 +49,7 @@ def _check_eol(
 ) -> int:
     my_version_info = version_info[python_version]
     today = date.today()
-    eol_date = date.fromisoformat(my_version_info["eol"])
+    eol_date = date.fromisoformat(my_version_info["End of Life"])
     time_to_eol = eol_date - today
 
     if time_to_eol.days < 0:
@@ -58,7 +58,7 @@ def _check_eol(
     if time_to_eol.days < EOL_WARN_DAYS:
         msg = (
             f"{prefix}Python {python_version} is going to "
-            f"be end of life in 2 months {eol_date}"
+            f"be end of life within the next 2 months ({eol_date})"
         )
 
         if fail_close_to_eol:
@@ -74,12 +74,13 @@ def _check_python_eol(
     *,
     fail_close_to_eol: bool = False,
     check_docker_files: bool = False,
+    nep_mode: bool = False,
 ) -> int:
-    db_file = _get_db_file_path()
+    db_file = _get_db_file_path(nep_mode=nep_mode)
     with db_file.open() as f:
         eol_data = json.load(f)
 
-    version_info = {entry["cycle"]: entry for entry in eol_data}
+    version_info = {entry["Version"]: entry for entry in eol_data}
 
     my_version = _get_major_minor()
 
@@ -120,6 +121,11 @@ def _get_argparser() -> argparse.ArgumentParser:
             "the python versions specified inside them"
         ),
     )
+    parser.add_argument(
+        "--nep29",
+        action="store_true",
+        help=("Use NEP0029 end of life policy"),
+    )
     return parser
 
 
@@ -130,6 +136,7 @@ def main() -> int:
     return _check_python_eol(
         fail_close_to_eol=args.fail_close_to_eol,
         check_docker_files=args.check_docker_files,
+        nep_mode=args.nep29,
     )
 
 
