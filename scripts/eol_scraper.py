@@ -1,6 +1,7 @@
-import requests
 import json
 from datetime import datetime
+
+import requests
 
 # URL of the API
 api_url = "https://endoflife.date/api/python.json"

@@ -1,7 +1,8 @@
-import requests
-from bs4 import BeautifulSoup
 import json
 from datetime import datetime
+
+import requests
+from bs4 import BeautifulSoup
 
 # URL of the table to scrape
 url = "https://numpy.org/neps/nep-0029-deprecation_policy.html#support-table"
@@ -38,7 +39,8 @@ for row in table.find_all("tr")[1:]:
     if existing_data:
         # Update the existing data with the minimum end_of_life_date
         existing_data["End of Life"] = min(
-            existing_data["End of Life"], end_of_life_date
+            existing_data["End of Life"],
+            end_of_life_date,
         )
     else:
         # Create a new dictionary for the row data
