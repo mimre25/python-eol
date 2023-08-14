@@ -9,7 +9,7 @@ PYTHON_VERSION_DOCKER_REGEX = re.compile(r"^FROM python:(\d.\d\d?).*")
 
 
 def _find_docker_files() -> Iterable[Path]:
-    return list(Path(".").glob("**/*Dockerfile*"))
+    return list(Path().glob("**/*Dockerfile*"))
 
 
 def _extract_python_version_from_docker_file(filename: Path) -> str | None:
