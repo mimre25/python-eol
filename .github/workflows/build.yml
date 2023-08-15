@@ -1,0 +1,27 @@
+---
+name: Build
+on:
+  workflow_call:
+  push:
+    branches: [master]
+jobs:
+  lint_and_test:
+    uses: ./.github/workflows/tox.yml
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: pip install build
+      - name: Build
+        run: python -m build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+          retention-days: 1
