@@ -1,0 +1,11 @@
+---
+name: Release
+on:
+  - push  # for testing purposes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' || github.ref != 'refs/heads/master' }}
+jobs:
+  lint_and_test:
+    steps:
+      - uses: ./.github/workflows/tox.yml
