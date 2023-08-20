@@ -1,0 +1,24 @@
+---
+name: Check Scrapers
+on:
+  schedule:
+    - cron: "0 1 * * *"
+jobs:
+  test_scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies
+        run: pip install -r requirements-scripts.txt
+      - name: Run EOL Scraper
+        run: python scripts/eol_scraper.py > eol.json
+      - name: Run Nep Scraper
+        run: python scripts/nep_scraper.py > nep.json
+      - name: Compare EOL db
+        run: diff eol.json python_eol/db.json
+      - name: Compare NEP db
+        run: diff nep.json python_eol/db_nep.json
