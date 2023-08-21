@@ -140,5 +140,15 @@ def main() -> int:
     )
 
 
+def foo() -> None:
+    # comment
+    """multi-line comment."""
+    a = 3 * 3
+    b = a
+
+    c = a * b
+    logging.info(f"{c=} bar")
+
+
 if __name__ == "__main__":
     raise SystemExit(main())
