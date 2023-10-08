@@ -1,5 +1,9 @@
 [
     {
+        "Version": "3.12",
+        "End of Life": "2028-10-02"
+    },
+    {
         "Version": "3.11",
         "End of Life": "2027-10-24"
     },
