@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 from freezegun import freeze_time
 
-from python_eol.main import _check_python_eol, _get_argparser, main
+from python_eol.main import _check_python_eol, _get_argparser, foo, main
 
 skip_py37 = pytest.mark.skipif(
     sys.version_info < (3, 8),
@@ -148,3 +148,8 @@ def test_version_in_dockerfile_close_to_eol(
         " (2023-06-27)"
     )
     assert caplog.record_tuples == [("python_eol.main", log_level, msg)]
+
+
+def test_foo() -> None:
+    foo(param=True)
+    assert True
