@@ -18,28 +18,15 @@ if TYPE_CHECKING:
         """Class to make MyPy happy (hack!)."""
 
 
-@pytest.fixture()
-def test_path_class(tmpdir: Path) -> type[TestPath]:
-    class TestPath(type(Path())):  # type: ignore[misc]
-        def __new__(
-            cls: type[TestPath],
-            *pathsegments: list[Path],
-        ) -> Any:  # noqa: ANN401
-            return super().__new__(cls, *[tmpdir, *pathsegments])
-
-    return TestPath
-
-
-def test_find_docker_files(tmpdir: Path, test_path_class: type[TestPath]) -> None:
-    p = Path(tmpdir / "Dockerfile")
+def test_find_docker_files(tmpdir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmpdir)
+    p = Path("Dockerfile")
     p.touch()
-    Path(tmpdir)
-    with mock.patch.object(
-        python_eol._docker_utils,  # noqa: SLF001
-        "Path",
-        test_path_class,
-    ):
-        assert _find_docker_files() == [p]
+    d = Path("a/b")
+    d.mkdir(parents=True)
+    p2 = d / "Dockerfile-test"
+    p2.touch()
+    assert sorted(_find_docker_files()) == sorted([p, p2])
 
 
 @pytest.mark.parametrize(

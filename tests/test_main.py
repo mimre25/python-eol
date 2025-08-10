@@ -30,6 +30,14 @@ def _mock_py37() -> Iterable[None]:
 mock_py37 = pytest.mark.usefixtures("_mock_py37")
 
 
+@pytest.fixture(autouse=True)
+def _mock_get_eol_data() -> Iterable[None]:
+    """Mock get_eol_data to avoid network calls."""
+    with mock.patch("python_eol.main.get_eol_data") as mocked_get_eol_data:
+        mocked_get_eol_data.return_value = None  # Fallback to packaged db.json
+        yield
+
+
 @pytest.fixture()
 def _mock_py311() -> Iterable[None]:
     with mock.patch("platform.python_version_tuple") as mocked_python_version_tuple:
