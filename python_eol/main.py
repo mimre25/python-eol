@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ._docker_utils import _extract_python_version_from_docker_file, _find_docker_files
+from .cache import get_eol_data
 
 EOL_WARN_DAYS = 60
 
@@ -47,7 +48,11 @@ def _check_eol(
     fail_close_to_eol: bool = False,
     prefix: str = "",
 ) -> int:
-    my_version_info = version_info[python_version]
+    my_version_info = version_info.get(python_version)
+    if not my_version_info:
+        logger.warning(f"Could not find EOL information for python {python_version}")
+        return 0
+
     today = date.today()
     eol_date = date.fromisoformat(my_version_info["End of Life"])
     time_to_eol = eol_date - today
@@ -76,9 +81,12 @@ def _check_python_eol(
     check_docker_files: bool = False,
     nep_mode: bool = False,
 ) -> int:
-    db_file = _get_db_file_path(nep_mode=nep_mode)
-    with db_file.open() as f:
-        eol_data = json.load(f)
+    eol_data = get_eol_data()
+    if eol_data is None:
+        logger.debug("Falling back to packaged EOL data.")
+        db_file = _get_db_file_path(nep_mode=nep_mode)
+        with db_file.open() as f:
+            eol_data = json.load(f)
 
     version_info = {entry["Version"]: entry for entry in eol_data}
 
