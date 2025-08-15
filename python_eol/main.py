@@ -1,15 +1,23 @@
 """python-eol checks if the current running python version is (close) to end of life."""
+
 from __future__ import annotations
 
 import argparse
 import json
 import logging
 import platform
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
 
+if sys.version_info >= (3, 9):
+    import importlib.resources
+else:
+    import pkg_resources
+
 from ._docker_utils import _extract_python_version_from_docker_file, _find_docker_files
+from .cache import get_eol_data
 
 EOL_WARN_DAYS = 60
 
@@ -22,20 +30,12 @@ def _get_major_minor() -> str:
 
 
 def _get_db_file_path(*, nep_mode: bool = False) -> Path:
-    major, minor, _ = platform.python_version_tuple()
     filename = "db.json" if not nep_mode else "db_nep.json"
-    if int(major) == 3 and int(minor) >= 9:  # noqa: PLR2004
-        import importlib.resources
-
+    if sys.version_info >= (3, 9):
         data_path = importlib.resources.files("python_eol")
-        db_file = f"{data_path}/{filename}"
+        db_file = str(data_path.joinpath(filename))
     else:
-        import pkg_resources  # pragma: no cover
-
-        db_file = pkg_resources.resource_filename(
-            "python_eol",
-            filename,
-        )  # pragma: no cover
+        db_file = pkg_resources.resource_filename("python_eol", filename)
 
     return Path(db_file)
 
@@ -47,7 +47,11 @@ def _check_eol(
     fail_close_to_eol: bool = False,
     prefix: str = "",
 ) -> int:
-    my_version_info = version_info[python_version]
+    my_version_info = version_info.get(python_version)
+    if not my_version_info:
+        logger.warning(f"Could not find EOL information for python {python_version}")
+        return 0
+
     today = date.today()
     eol_date = date.fromisoformat(my_version_info["End of Life"])
     time_to_eol = eol_date - today
@@ -76,9 +80,12 @@ def _check_python_eol(
     check_docker_files: bool = False,
     nep_mode: bool = False,
 ) -> int:
-    db_file = _get_db_file_path(nep_mode=nep_mode)
-    with db_file.open() as f:
-        eol_data = json.load(f)
+    eol_data = get_eol_data(nep_mode=nep_mode)
+    if eol_data is None:
+        logger.debug("Falling back to packaged EOL data.")
+        db_file = _get_db_file_path(nep_mode=nep_mode)
+        with db_file.open() as f:
+            eol_data = json.load(f)
 
     version_info = {entry["Version"]: entry for entry in eol_data}
 
