@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Simple tool to check if python version is past EOL"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 dependencies = [
     "appdirs",
     "requests",
@@ -78,6 +78,6 @@ ignore_missing_imports = true
 
 ##### black #####
 [tool.black]
-target_version = ["py37", "py38", "py39", "py310", "py311"]
+target_version = ["py38", "py39", "py310", "py311"]
 include = '\.py$'
 exclude = '.+\.json'
