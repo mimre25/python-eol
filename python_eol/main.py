@@ -81,7 +81,7 @@ def _check_python_eol(
     check_docker_files: bool = False,
     nep_mode: bool = False,
 ) -> int:
-    eol_data = get_eol_data()
+    eol_data = get_eol_data(nep_mode=nep_mode)
     if eol_data is None:
         logger.debug("Falling back to packaged EOL data.")
         db_file = _get_db_file_path(nep_mode=nep_mode)
