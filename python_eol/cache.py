@@ -1,4 +1,5 @@
 """Cache management for python-eol."""
+
 from __future__ import annotations
 
 import json
@@ -54,7 +55,10 @@ def _fetch_nep_data() -> list[dict[str, Any]] | None:
     soup = BeautifulSoup(response.content, "html.parser")
     table = soup.find("table")
 
-    data = []
+    if table is None or isinstance(table, str):
+        return None
+
+    data: list[dict[str, Any]] = []
     for row in table.find_all("tr")[1:]:
         columns = row.find_all("td")
         end_of_life = columns[0].text.strip()
@@ -71,7 +75,10 @@ def _fetch_nep_data() -> list[dict[str, Any]] | None:
                 str(end_of_life_date),
             )
         else:
-            row_data = {"Version": parsed_version, "End of Life": str(end_of_life_date)}
+            row_data = {
+                "Version": parsed_version,
+                "End of Life": str(end_of_life_date),
+            }
             data.append(row_data)
     return data
 
@@ -82,14 +89,18 @@ def _read_cache(*, nep_mode: bool = False) -> list[dict[str, Any]] | None:
     if not cache_file.exists():
         return None
 
-    if datetime.fromtimestamp(cache_file.stat().st_mtime) < datetime.now() - CACHE_EXPIRY:
+    is_expired = (
+        datetime.fromtimestamp(cache_file.stat().st_mtime)
+        < datetime.now() - CACHE_EXPIRY
+    )
+    if is_expired:
         logger.debug("Cache is expired.")
         return None
 
     try:
         with cache_file.open() as f:
-            return json.load(f)
-    except (IOError, json.JSONDecodeError) as e:
+            return json.load(f)  # type: ignore[no-any-return]
+    except (OSError, json.JSONDecodeError) as e:
         logger.warning(f"Failed to read cache: {e}")
         return None
 
@@ -101,7 +112,7 @@ def _write_cache(data: list[dict[str, Any]], *, nep_mode: bool = False) -> None:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         with cache_file.open("w") as f:
             json.dump(data, f, indent=4)
-    except IOError as e:
+    except OSError as e:
         logger.warning(f"Failed to write cache: {e}")
 
 

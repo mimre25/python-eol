@@ -1,13 +1,20 @@
 """python-eol checks if the current running python version is (close) to end of life."""
+
 from __future__ import annotations
 
 import argparse
 import json
 import logging
 import platform
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Any
+
+if sys.version_info >= (3, 9):
+    import importlib.resources
+else:
+    import pkg_resources
 
 from ._docker_utils import _extract_python_version_from_docker_file, _find_docker_files
 from .cache import get_eol_data
@@ -23,20 +30,12 @@ def _get_major_minor() -> str:
 
 
 def _get_db_file_path(*, nep_mode: bool = False) -> Path:
-    major, minor, _ = platform.python_version_tuple()
     filename = "db.json" if not nep_mode else "db_nep.json"
-    if int(major) == 3 and int(minor) >= 9:  # noqa: PLR2004
-        import importlib.resources
-
+    if sys.version_info >= (3, 9):
         data_path = importlib.resources.files("python_eol")
-        db_file = f"{data_path}/{filename}"
+        db_file = str(data_path.joinpath(filename))
     else:
-        import pkg_resources  # pragma: no cover
-
-        db_file = pkg_resources.resource_filename(
-            "python_eol",
-            filename,
-        )  # pragma: no cover
+        db_file = pkg_resources.resource_filename("python_eol", filename)
 
     return Path(db_file)
 

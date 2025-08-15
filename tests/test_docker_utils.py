@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
-from unittest import mock
+from typing import TYPE_CHECKING
 
 import pytest
 
-import python_eol
 from python_eol._docker_utils import (
     _extract_python_version_from_docker_file,
     _find_docker_files,

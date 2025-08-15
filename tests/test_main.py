@@ -20,7 +20,7 @@ skip_py38 = pytest.mark.skipif(
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_py37() -> Iterable[None]:
     with mock.patch("platform.python_version_tuple") as mocked_python_version_tuple:
         mocked_python_version_tuple.return_value = (3, 7, 0)
@@ -38,7 +38,7 @@ def _mock_get_eol_data() -> Iterable[None]:
         yield
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_py311() -> Iterable[None]:
     with mock.patch("platform.python_version_tuple") as mocked_python_version_tuple:
         mocked_python_version_tuple.return_value = (3, 11, 0)

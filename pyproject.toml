@@ -72,6 +72,10 @@ exclude_lines = ['^if __name__ == "__main__":$', 'raise SystemExit(.+)$']
 python_version = "3.11"
 strict = true
 
+[[tool.mypy.overrides]]
+module = "appdirs"
+ignore_missing_imports = true
+
 ##### black #####
 [tool.black]
 target_version = ["py37", "py38", "py39", "py310", "py311"]

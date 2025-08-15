@@ -2,7 +2,7 @@
 name: Check Scrapers
 on:
   schedule:
-    - cron: "0 1 * * *"
+    - cron: 0 1 * * *
 jobs:
   test_scripts:
     runs-on: ubuntu-latest
