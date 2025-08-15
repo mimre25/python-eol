@@ -20,7 +20,7 @@ skip_py38 = pytest.mark.skipif(
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_py37() -> Iterable[None]:
     with mock.patch("platform.python_version_tuple") as mocked_python_version_tuple:
         mocked_python_version_tuple.return_value = (3, 7, 0)
@@ -30,7 +30,15 @@ def _mock_py37() -> Iterable[None]:
 mock_py37 = pytest.mark.usefixtures("_mock_py37")
 
 
-@pytest.fixture()
+@pytest.fixture
+def mock_get_eol_data() -> Iterable[mock.MagicMock]:
+    """Mock get_eol_data to avoid network calls."""
+    with mock.patch("python_eol.main.get_eol_data") as mocked_get_eol_data:
+        mocked_get_eol_data.return_value = None  # Fallback to packaged db.json
+        yield mocked_get_eol_data
+
+
+@pytest.fixture
 def _mock_py311() -> Iterable[None]:
     with mock.patch("platform.python_version_tuple") as mocked_python_version_tuple:
         mocked_python_version_tuple.return_value = (3, 11, 0)
@@ -64,9 +72,10 @@ def test_get_argparser2() -> None:
 
 @mock_py37
 @freeze_time("2021-12-27")
-def test_ep_mode() -> None:
+def test_ep_mode(mock_get_eol_data: mock.MagicMock) -> None:
     result = _check_python_eol(nep_mode=True)
     assert result == 1
+    mock_get_eol_data.assert_called_once_with(nep_mode=True)
 
 
 @mock_py37
@@ -74,34 +83,39 @@ def test_ep_mode() -> None:
 @pytest.mark.parametrize("fail_close_to_eol", [True, False])
 def test_check_python_eol(
     fail_close_to_eol: bool,
+    mock_get_eol_data: mock.MagicMock,
 ) -> None:
     result = _check_python_eol(fail_close_to_eol=fail_close_to_eol)
     if fail_close_to_eol:
         assert result == 1
     else:
         assert result == 0
+    mock_get_eol_data.assert_called_once_with(nep_mode=False)
 
 
 @mock_py37
 @freeze_time("2023-06-28")  # python 3.7 eol is 2023-06-27
-def test_version_beyond_eol() -> None:
+def test_version_beyond_eol(mock_get_eol_data: mock.MagicMock) -> None:
     assert _check_python_eol() == 1
+    mock_get_eol_data.assert_called_once_with(nep_mode=False)
 
 
 @skip_py37
 @skip_py38
 @mock_py311
 @freeze_time("2023-06-28")  # python 3.11 eol is 2027-10-24
-def test_version_far_from_eol() -> None:
+def test_version_far_from_eol(mock_get_eol_data: mock.MagicMock) -> None:
     assert _check_python_eol() == 0
+    mock_get_eol_data.assert_called_once_with(nep_mode=False)
 
 
 @skip_py37
 @skip_py38
 @mock_py311
 @freeze_time("2023-06-28")  # python 3.11 eol is 2027-10-24
-def test_main() -> None:
+def test_main(mock_get_eol_data: mock.MagicMock) -> None:
     assert main() == 0
+    mock_get_eol_data.assert_called_once_with(nep_mode=False)
 
 
 @skip_py37
@@ -110,12 +124,14 @@ def test_main() -> None:
 @freeze_time("2023-06-28")  # python 3.7 eol is 2023-06-27
 def test_version_in_dockerfile_errors(
     tmpdir: Path,
+    mock_get_eol_data: mock.MagicMock,
 ) -> None:
     with mock.patch("python_eol.main._find_docker_files") as mocked_find_docker_files:
         p = Path(tmpdir / "Dockerfile")
         p.write_text("FROM python:3.7")
         mocked_find_docker_files.return_value = [p]
         assert _check_python_eol(check_docker_files=True) == 1
+    mock_get_eol_data.assert_called_once_with(nep_mode=False)
 
 
 @skip_py37
@@ -123,16 +139,17 @@ def test_version_in_dockerfile_errors(
 @mock_py311
 @freeze_time("2023-06-22")  # python 3.7 eol is 2023-06-27
 @pytest.mark.parametrize(
-    ("fail_close_to_eol", "expected_return_status", "log_level"),
-    [(True, 1, logging.ERROR), (False, 0, logging.WARNING)],
+    ("fail_close_to_eol", "expected"),
+    [(True, (1, logging.ERROR)), (False, (0, logging.WARNING))],
 )
 def test_version_in_dockerfile_close_to_eol(
     tmpdir: Path,
     fail_close_to_eol: bool,
-    expected_return_status: int,
-    log_level: int,
+    expected: tuple[int, int],
     caplog: pytest.LogCaptureFixture,
+    mock_get_eol_data: mock.MagicMock,
 ) -> None:
+    expected_return_status, log_level = expected
     with mock.patch("python_eol.main._find_docker_files") as mocked_find_docker_files:
         p = Path(tmpdir / "Dockerfile")
         p.write_text("FROM python:3.7")
@@ -148,3 +165,4 @@ def test_version_in_dockerfile_close_to_eol(
         " (2023-06-27)"
     )
     assert caplog.record_tuples == [("python_eol.main", log_level, msg)]
+    mock_get_eol_data.assert_called_once_with(nep_mode=False)

@@ -11,6 +11,11 @@ authors = [
 description = "Simple tool to check if python version is past EOL"
 readme = "README.md"
 requires-python = ">=3.7"
+dependencies = [
+  "appdirs",
+  "requests",
+  "setuptools",
+]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
@@ -22,6 +27,13 @@ classifiers = [
 
 [project.scripts]
 eol = "python_eol.main:main"
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "freezegun",
+  "pytest-cov",
+]
 
 [tool.setuptools]
 packages = ["python_eol"]
